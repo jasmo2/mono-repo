@@ -1,0 +1,73 @@
+{
+  "private": true,
+  "name": "@mattersupplyco/ui",
+  "description": "",
+  "version": "0.0.1",
+  "author": "@mattersupply.co",
+  "license": "UNLICENSED",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "scripts": {
+    "test": "jest --coverage",
+    "develop": "start-storybook -p 6006",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "testPathIgnorePatterns": [
+      "dist/"
+    ]
+  },
+  "peerDependencies": {
+    "@emotion/core": "^10",
+    "@emotion/styled": "^10",
+    "emotion-theming": "^10",
+    "react": "^16",
+    "react-dom": "^16"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
+    "@emotion/core": "^10",
+    "@emotion/styled": "^10",
+    "@storybook/addon-actions": "^5.3.18",
+    "@storybook/addon-links": "^5.3.18",
+    "@storybook/addons": "^5.3.18",
+    "@storybook/react": "^5.3.18",
+    "@testing-library/jest-dom": "^5.3.0",
+    "@testing-library/react": "^10.0.2",
+    "@types/facepaint": "^1.2.1",
+    "@types/jest": "^24.0.23",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12",
+    "@types/react": "^16",
+    "@types/react-dom": "^16",
+    "awesome-typescript-loader": "^5.2.1",
+    "babel-loader": "^8.1.0",
+    "emotion-theming": "^10",
+    "facepaint": "^1.2.1",
+    "jest": "^24.9.0",
+    "jest-emotion": "^10.0.26",
+    "prettier": "^1.8.2",
+    "react": "^16",
+    "react-dom": "^16",
+    "react-test-renderer": "^16.12.0",
+    "storybook": "^5.3.18",
+    "style-loader": "^1.0.1",
+    "ts-jest": "^24.2.0",
+    "ts-node": "^8.4.1",
+    "tsconfig-paths-webpack-plugin": "^3.2.0",
+    "typescript": "^3.7.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "@types/rebass": "^4.0.5",
+    "facepaint": "^1.2.1",
+    "rebass": "^4.0.7"
+  }
+}

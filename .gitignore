@@ -1,0 +1,39 @@
+# env
+.env
+.env.*
+.env-*
+
+# package directories
+node_modules
+jspm_packages
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+lib
+dist
+
+# Jest
+coverage
+
+# Cache
+.cache
+
+# Serverless directories
+.serverless
+
+# Webpack directories
+.webpack
+
+# GraphMatter directories
+.graphmatter
+
+# npm stuff
+.npm
+
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.js
+
+yarn-error.log

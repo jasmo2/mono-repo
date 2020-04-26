@@ -1,0 +1,7 @@
+app:
+  name: my-project
+  org: mattersupply
+
+aws:
+  region: us-east-1
+  profile: default

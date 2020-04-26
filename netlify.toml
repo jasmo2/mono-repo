@@ -1,0 +1,8 @@
+[build]
+  base = "./"
+  publish = "public/"
+  command = "yarn test && yarn build"
+
+[context.storybook-master]
+  publish = "./"
+  command = "exit 0"
