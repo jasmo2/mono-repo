@@ -4,13 +4,16 @@
   "version": "0.0.1",
   "workspaces": {
     "packages": [
-      "packages/ui"
+      "packages/ui",
+      "packages/web"
     ]
   },
   "scripts": {
     "test:ui": "yarn --cwd packages/ui run test",
+    "develop": "netlify dev",
     "develop:ui": "yarn --cwd packages/ui run develop",
-    "build:storybook": "yarn --cwd packages/ui run build-storybook"
+    "build:storybook": "yarn --cwd packages/ui run build-storybook",
+    "build:app": "yarn --cwd packages/app run build"
   },
   "author": "@mattersupply.co",
   "license": "UNLICENSED",

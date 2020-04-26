@@ -1,0 +1,23 @@
+{
+  "name": "@mattersupply/hallway-app",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "scripts": {
+    "develop": "next",
+    "build": "next build",
+    "postbuild": "next-on-netlify",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^9.3.5",
+    "next-on-netlify": "^1.2.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.4",
+    "@types/react": "^16.9.34",
+    "serve": "^11.3.0",
+    "typescript": "^3.8.3"
+  }
+}

@@ -1,8 +1,17 @@
 [build]
   base = "./"
-  publish = "public/"
-  command = "yarn test && yarn build"
+  command = "yarn build:app"
+  publish = "packages/app/public"
+  functions = "packages/app/functions"
 
 [context.storybook-master]
   publish = "./"
   command = "exit 0"
+
+# [dev]
+#   command = "yarn --cwd packages/app run develop"
+#   targetPort = 3000
+[dev]
+  command   = "yarn --cwd packages/app run serve public -p 3000"
+  functions = "packages/app/functions"
+  publish   = "packages/app/public"

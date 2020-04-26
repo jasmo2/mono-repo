@@ -40,5 +40,9 @@ coverage
 .pnp.js
 
 yarn-error.log
-public
-out
+
+# next.js build output
+.next
+functions/nextRouter
+public/_next
+public/_redirects
