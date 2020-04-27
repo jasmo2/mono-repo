@@ -1,8 +1,12 @@
 import React from 'react'
+import { Link } from 'gatsby'
 
-const About: React.FC = props => {
-  console.log('Props: ', props)
-  return <div>Abouts</div>
-}
+import { Button } from '@mattersupply/hallway-ui'
 
-export default About
+const IndexPage: React.FC = () => (
+  <div>
+    Index<Button>Hi!</Button>
+  </div>
+)
+
+export default IndexPage

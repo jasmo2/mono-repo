@@ -1,4 +1,0 @@
-[dev]
-  command   = "yarn serve public -p 3000"
-  functions = "functions"
-  publish   = "public"

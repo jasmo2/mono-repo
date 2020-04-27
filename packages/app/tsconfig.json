@@ -1,28 +1,44 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["react", "jest", "node"],
+    "outDir": "dist",
+    "module": "commonjs",
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
     "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
+    "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react",
     "baseUrl": "./",
     "paths": {
-      "~/static/*": ["static/*"],
-      "~/*": ["src/*"],
+      "~app/static/*": ["static/*"],
+      "~app/*": ["src/*"],
 
       "~ui/static/*": ["../ui/static/*"],
       "~ui/*": ["../ui/src/*"]
-    }
+    },
+    "alwaysStrict": false,
+    "noImplicitUseStrict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmit": true,
+    "skipLibCheck": true
   },
-  "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": ["src", "static", "src/.d.ts"],
+  "exclude": [
+    "../../node_modules",
+    "node_modules",
+    "dist",
+    "./src/**/*.spec.ts",
+    "./src/**/*.spec.tsx"
+  ]
 }
