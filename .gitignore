@@ -1,6 +1,9 @@
 # System
 .DS_Store
 
+# Netlify
+.netlify
+
 # env
 .env
 .env.*
