@@ -68,6 +68,7 @@
   "dependencies": {
     "@types/rebass": "^4.0.5",
     "facepaint": "^1.2.1",
+    "framer-motion": "^1.10.3",
     "rebass": "^4.0.7"
   }
 }
