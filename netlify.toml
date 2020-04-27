@@ -2,7 +2,6 @@
   base = "./"
   command = "yarn build:app"
   publish = "packages/app/public"
-  functions = "packages/app/functions"
 
 [context.storybook-master]
   publish = "./"
@@ -12,6 +11,6 @@
 #   command = "yarn --cwd packages/app run develop"
 #   targetPort = 3000
 [dev]
-  command   = "yarn --cwd packages/app run serve public -p 3000"
-  functions = "packages/app/functions"
+  command   = "yarn --cwd packages/app run develop"
+  targetPort = 8000
   publish   = "packages/app/public"
