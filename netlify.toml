@@ -3,7 +3,7 @@
   command = "yarn build:app"
   publish = "packages/app/public"
 
-[context.storybook-master]
+[context."storybook/master"]
   publish = "./"
   command = "exit 0"
 
