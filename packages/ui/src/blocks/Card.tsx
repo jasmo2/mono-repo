@@ -11,6 +11,7 @@ import {
   useTransform,
   useSpring,
   transform,
+  useAnimation,
 } from 'framer-motion'
 import { tween } from 'popmotion'
 import { linear } from '@popmotion/easing'
@@ -29,35 +30,23 @@ interface CardProps extends RebassCardProps {
 const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 })
   const cardRef = useRef<any>()
+  const hoverIndicatorRef = useRef<any>()
   const {
     onHover,
     onHoverEnd,
     onHoverStart,
-    x,
-    y,
-    boxShadow,
     pointerX,
     pointerY,
     hover,
-  } = useAnimatedCard(cardRef)
+    cardParallaxAnimation,
+    imageParallaxAnimation,
+    hoverIndicatorAnimation,
+  } = useAnimatedCard(cardRef, hoverIndicatorRef)
 
   const layout =
     assets.length > 1
       ? { x: 2, y: Math.ceil(assets.length / 2) }
       : { x: 1, y: 1 }
-
-  console.log('')
-
-  const hoverIndicatorX = useTransform(
-    pointerX,
-    [0, 1],
-    ['-100px', `${cardSize.width - 100}px `]
-  )
-  const hoverIndicatorY = useTransform(
-    pointerY,
-    [0, 1],
-    ['-100px', `${cardSize.height - 100}px`]
-  )
 
   useLayoutEffect(() => {
     const rect = cardRef.current.getBoundingClientRect()
@@ -71,9 +60,8 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
       // backgroundColor={'blue'}
     >
       <ParallaxContainer
-        style={{ x, y, boxShadow }}
+        animate={cardParallaxAnimation}
         whileHover={{
-          scale: 1.05,
           zIndex: 100,
         }}
         onHoverStart={onHoverStart}
@@ -81,23 +69,15 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
         onMouseOut={onHoverEnd}
       >
         <HoverIndicator
-          style={{
-            x: hoverIndicatorX,
-            y: hoverIndicatorY,
-            opacity: hover,
-          }}
+          ref={hoverIndicatorRef}
+          initial={{ opacity: 0 }}
+          animate={hoverIndicatorAnimation}
         />
-        <motion.div
-          style={{
-            x,
-            y,
-          }}
-          whileHover={{ scale: 1.1 }}
-        >
+        <ParallaxInnerContainer animate={imageParallaxAnimation}>
           <Flex flexDirection={'row'} flexWrap={'wrap'}>
-            {assets.map(asset => {
+            {assets.map((asset, index) => {
               return (
-                <Box key={asset} width={1 / layout.x}>
+                <Box key={`${asset}-${index}`} width={1 / layout.x}>
                   <AspectRatioContainer>
                     <AspectRatioInner>
                       <Image src={asset} />
@@ -107,7 +87,7 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
               )
             })}
           </Flex>
-        </motion.div>
+        </ParallaxInnerContainer>
       </ParallaxContainer>
     </RebassCard>
   )
@@ -120,16 +100,11 @@ const ParallaxContainer = styled(motion.div)({
   overflow: 'hidden',
   borderRadius: 10,
   cursor: 'none',
+})
 
-  // '&:before': {
-  //   position: 'absolute',
-  //   top: 0,
-  //   left: 0,
-  //   right: 0,
-  //   bottom: 0,
-  //   zIndex: 1000,
-  //   boxShadow: `0px 0px 10px rgba(255, 255, 255, 0.75)`,
-  // },
+const ParallaxInnerContainer = styled(motion.div)({
+  overflow: 'hidden',
+  borderRadius: 10,
 })
 
 const Image = styled(motion.img)({
@@ -155,57 +130,148 @@ const AspectRatioInner = styled(Box)({
 
 const HoverIndicator = styled(motion.div)({
   position: 'absolute',
-  background: 'radial-gradient(circle, rgba(173, 0, 255, 0.2), transparent)',
-  // top: 0,
-  // left: 0,
-  borderRadius: '100px',
-  width: '200px',
-  height: '200px',
+  background:
+    'radial-gradient(closest-side, rgba(255, 255, 255, 0.4), transparent)',
+  width: '400px',
+  height: '400px',
   zIndex: 1000,
 })
 
 // Hooks
 
-function useAnimatedCard(cardRef: React.MutableRefObject<any>) {
+function useAnimatedCard(
+  cardRef: React.MutableRefObject<any>,
+  hoverIndicatorRef: React.MutableRefObject<any>
+) {
+  const shadowOffset = transform([0, 1], ['6px', '-6px'])
+  const shadowOpacity = transform([0, 1], [0, 0.2])
+  const translate = transform([0, 1], ['-4px', '4px'])
+
+  const cardParallaxAnimation = useAnimation()
+  const imageParallaxAnimation = useAnimation()
+  const hoverIndicatorAnimation = useAnimation()
+
   const pointerX = useMotionValue(0)
   const pointerY = useMotionValue(0)
-
   const hover = useMotionValue(0)
 
-  const x = useSpring(useTransform(pointerX, [0, 1], ['-4px', '4px']), {
-    stiffness: 300,
-    damping: 30,
-  })
-
-  const y = useSpring(useTransform(pointerY, [0, 1], ['-4px', '4px']), {
-    stiffness: 300,
-    damping: 30,
-  })
-
-  const boxShadow = useMotionValue(`0px`)
-
   useEffect(() => {
-    function updateBoxShadow() {
-      console.log('Pointer: ', pointerX.get(), pointerY.get())
-      const shadowOffsetX = transform([0, 1], ['6px', '-6px'])
-      const shadowOpacity = transform([0, 1], [0, 0.2])
-      const newShadowValue = `${shadowOffsetX(pointerX.get())} ${shadowOffsetX(
-        pointerY.get()
-      )} 20px rgba(173, 0, 255, ${shadowOpacity(hover.get())})`
-      console.log('New Value: ', newShadowValue)
-      boxShadow.set(newShadowValue)
+    const indicatorRect =
+      hoverIndicatorRef.current.getBoundingClientRect() || {}
+    const cardRect = cardRef.current.getBoundingClientRect() || {}
+
+    const indicatorSize_2 = {
+      width: indicatorRect.width / 2,
+      height: indicatorRect.height / 2,
+    }
+    const translateIndicatorX = transform(
+      [0, 1],
+      [-indicatorSize_2.width, cardRect.width - indicatorSize_2.width]
+    )
+    const translateIndicatorY = transform(
+      [0, 1],
+      [-indicatorSize_2.height, cardRect.height - indicatorSize_2.height]
+    )
+
+    function updatePointerMovement() {
+      // console.log('Pointer: ', pointerX.get(), pointerY.get())
+      const hoverValue = hover.get()
+      const pointerXValue = hoverValue > 0 ? pointerX.get() : 0.5
+      const pointerYValue = hoverValue > 0 ? pointerY.get() : 0.5
+
+      const shadowValue = `${shadowOffset(pointerXValue)} ${shadowOffset(
+        pointerYValue
+      )} 20px rgba(173, 0, 255, ${shadowOpacity(hoverValue)})`
+
+      cardParallaxAnimation.start(
+        {
+          x: translate(pointerXValue),
+          y: translate(pointerYValue),
+          transition: {
+            type: 'tween',
+            duration: 0.1,
+          },
+          boxShadow: shadowValue,
+        },
+        {
+          scale: {
+            type: 'tween',
+            duration: 0.3,
+          },
+        }
+      )
+
+      imageParallaxAnimation.start(
+        {
+          x: translate(pointerXValue),
+          y: translate(pointerYValue),
+          transition: { type: 'tween', duration: 0.1 },
+        },
+        {
+          scale: {
+            type: 'tween',
+            duration: 0.3,
+          },
+        }
+      )
+
+      if (hoverValue > 0) {
+        hoverIndicatorAnimation.start({
+          x: translateIndicatorX(pointerXValue),
+          y: translateIndicatorY(pointerYValue),
+          transition: { type: 'tween', duration: 0 },
+        })
+      }
     }
 
-    const unsubscribeX = pointerX.onChange(updateBoxShadow)
-    const unsubscribeY = pointerY.onChange(updateBoxShadow)
-    const unsubscribeHover = hover.onChange(updateBoxShadow)
+    function updateHover() {
+      const scaleCard = transform([0, 1], [1, 1.1])
+      const hoverValue = hover.get()
+      cardParallaxAnimation.start(
+        {
+          scale: scaleCard(hoverValue),
+        },
+        {
+          scale: {
+            type: 'tween',
+            duration: 0.3,
+          },
+        }
+      )
+
+      imageParallaxAnimation.start(
+        {
+          scale: scaleCard(hoverValue),
+        },
+        {
+          scale: {
+            type: 'tween',
+            duration: 0.3,
+          },
+        }
+      )
+
+      hoverIndicatorAnimation.start({
+        opacity: hoverValue,
+        transition: {
+          type: 'tween',
+          duration: 0.5,
+        },
+      })
+
+      updatePointerMovement()
+    }
+
+    const unsubscribeX = pointerX.onChange(updatePointerMovement)
+    const unsubscribeY = pointerY.onChange(updatePointerMovement)
+    const unsubscribeHover = hover.onChange(updateHover)
 
     return () => {
       unsubscribeX()
       unsubscribeY()
       unsubscribeHover()
     }
-  }, [])
+  }, [cardRef, hoverIndicatorRef])
 
   // const boxShadow = useTransform(
   //   pointerY,
@@ -227,16 +293,12 @@ function useAnimatedCard(cardRef: React.MutableRefObject<any>) {
   // )
 
   const onHoverStart = useCallback(() => {
-    tween({
-      from: hover.get(),
-      to: 1,
-      duration: 100,
-      ease: linear,
-    }).start((v: number) => hover.set(v))
+    hover.set(1)
   }, [])
 
   const onHover = useCallback(
     (e: any) => {
+      hover.set(1)
       const rect = cardRef.current.getBoundingClientRect()
       const x = e.clientX - rect.left //x position within the element.
       const y = e.clientY - rect.top //y position within the element.
@@ -248,33 +310,18 @@ function useAnimatedCard(cardRef: React.MutableRefObject<any>) {
   )
 
   const onHoverEnd = useCallback(() => {
-    tween({
-      from: pointerX.get(),
-      to: 0.5,
-      duration: 100,
-    }).start((v: number) => pointerX.set(v))
-    tween({
-      from: pointerY.get(),
-      to: 0.5,
-      duration: 100,
-    }).start((v: number) => pointerY.set(v))
-    tween({
-      from: hover.get(),
-      to: 0,
-      duration: 100,
-      ease: linear,
-    }).start((v: number) => hover.set(v))
+    hover.set(0)
   }, [])
 
   return {
     onHover,
     onHoverStart,
     onHoverEnd,
-    x,
-    y,
-    boxShadow,
     pointerX,
     pointerY,
     hover,
+    cardParallaxAnimation,
+    imageParallaxAnimation,
+    hoverIndicatorAnimation,
   }
 }

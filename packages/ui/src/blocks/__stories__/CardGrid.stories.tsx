@@ -25,16 +25,16 @@ const data = [
     key: 'a',
   },
   { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
+  { assets: [require('~ui/static/andres.png')], key: 'd' },
+  { assets: [require('~ui/static/andres.png')], key: 'e' },
+  { assets: [require('~ui/static/andres.png')], key: 'f' },
+  { assets: [require('~ui/static/andres.png')], key: 'g' },
+  { assets: [require('~ui/static/andres.png')], key: 'h' },
+  { assets: [require('~ui/static/andres.png')], key: 'i' },
+  { assets: [require('~ui/static/andres.png')], key: 'j' },
+  { assets: [require('~ui/static/andres.png')], key: 'k' },
 
-  { assets: [require('~ui/static/andres.png')], key: 'b' },
+  { assets: [require('~ui/static/andres.png')], key: 'l' },
 ]
 
 export const basic = () => (
