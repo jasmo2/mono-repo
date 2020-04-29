@@ -66,6 +66,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
+    "@popmotion/easing": "^1.0.2",
     "@types/rebass": "^4.0.5",
     "facepaint": "^1.2.1",
     "framer-motion": "^1.10.3",
