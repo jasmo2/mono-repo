@@ -2,19 +2,10 @@ import React, {
   useRef,
   useCallback,
   useEffect,
-  useState,
   useLayoutEffect,
+  useState,
 } from 'react'
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  useSpring,
-  transform,
-  useAnimation,
-} from 'framer-motion'
-import { tween } from 'popmotion'
-import { linear } from '@popmotion/easing'
+import { motion, useMotionValue, transform, useAnimation } from 'framer-motion'
 import {
   Card as RebassCard,
   CardProps as RebassCardProps,
@@ -28,16 +19,12 @@ interface CardProps extends RebassCardProps {
 }
 
 const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
-  const [cardSize, setCardSize] = useState({ width: 0, height: 0 })
   const cardRef = useRef<any>()
   const hoverIndicatorRef = useRef<any>()
   const {
     onHover,
     onHoverEnd,
     onHoverStart,
-    pointerX,
-    pointerY,
-    hover,
     cardParallaxAnimation,
     imageParallaxAnimation,
     hoverIndicatorAnimation,
@@ -45,66 +32,141 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
 
   const layout =
     assets.length > 1
-      ? { x: 2, y: Math.ceil(assets.length / 2) }
-      : { x: 1, y: 1 }
+      ? { x: 2, y: Math.floor(assets.length / 2), items: assets.length }
+      : { x: 1, y: 1, items: assets.length }
 
-  useLayoutEffect(() => {
-    const rect = cardRef.current.getBoundingClientRect()
-    setCardSize({ width: rect.width, height: rect.height })
-  }, [cardRef])
+  let rowSpan = layout.y
+  if (layout.x === 1 && layout.y === 1) {
+    rowSpan = 2
+  }
+
+  // useLayoutEffect(() => {
+  //   if (cardRef.current) {
+  // const cardRect = cardRef.current.getBoundingClientRect()
+  // const cardHeight = cardRect.width
+
+  // setCardHeight(((cardHeight * 0.5625) / 2) * rowSpan)
+  // }
+  // }, [cardRef])
 
   return (
-    <RebassCard
-      ref={cardRef}
-      {...(props as any)}
-      // backgroundColor={'blue'}
-    >
-      <ParallaxContainer
-        animate={cardParallaxAnimation}
-        whileHover={{
-          zIndex: 100,
-        }}
-        onHoverStart={onHoverStart}
-        onMouseMove={onHover}
-        onMouseOut={onHoverEnd}
-      >
-        <HoverIndicator
-          ref={hoverIndicatorRef}
-          initial={{ opacity: 0 }}
-          animate={hoverIndicatorAnimation}
-        />
-        <ParallaxInnerContainer animate={imageParallaxAnimation}>
-          <Flex flexDirection={'row'} flexWrap={'wrap'}>
-            {assets.map((asset, index) => {
-              return (
-                <Box key={`${asset}-${index}`} width={1 / layout.x}>
-                  <AspectRatioContainer>
-                    <AspectRatioInner>
-                      <Image src={asset} />
-                    </AspectRatioInner>
-                  </AspectRatioContainer>
-                </Box>
-              )
-            })}
-          </Flex>
-        </ParallaxInnerContainer>
-      </ParallaxContainer>
-    </RebassCard>
+    <Box sx={{ gridRowEnd: `span ${rowSpan}` }} key={props.key}>
+      <RebassCard ref={cardRef} {...(props as any)} padding={0} height={'100%'}>
+        <ParallaxContainer
+          animate={cardParallaxAnimation}
+          whileHover={{
+            zIndex: 100,
+          }}
+          onHoverStart={onHoverStart}
+          onMouseMove={onHover}
+          onMouseOut={onHoverEnd}
+        >
+          <HoverIndicator
+            ref={hoverIndicatorRef}
+            initial={{ opacity: 0 }}
+            animate={hoverIndicatorAnimation}
+          />
+          <ParallaxInnerContainer animate={imageParallaxAnimation}>
+            <AssetGrid assets={assets} layout={layout} />
+          </ParallaxInnerContainer>
+        </ParallaxContainer>
+      </RebassCard>
+    </Box>
   )
 }
 
 export default Card
+
+interface AssetGridProps extends Pick<CardProps, 'assets'> {
+  layout: {
+    x: number
+    y: number
+    items: number
+  }
+}
+
+const AssetGrid: React.FC<AssetGridProps> = ({ assets, layout, ...props }) => {
+  // Layout is a bit complicated as the last row might have an extra element.
+  // const imageLayout = layout
+  // let lastRowRowTemplate = ``
+  // let lastRowColumnTemplate = ``
+  // if (layout.items / 2 > layout.y) {
+  //   lastRowRowTemplate = `1fr`
+  //   lastRowColumnTemplate =
+  // }
+
+  const gridData: string[][] = [[]]
+  assets.forEach((asset, index) => {
+    let x = index % layout.x
+    let y = Math.floor(index / layout.x)
+    // If we have an extra element (uneven number), then we append that element
+    // to the last row in the grid data.
+    if (y == layout.y) {
+      y = layout.y - 1
+      x = layout.x
+    }
+
+    if (!gridData[y]) {
+      gridData[y] = []
+    }
+
+    gridData[y][x] = asset
+  })
+
+  console.log('Grid: ', gridData)
+
+  return (
+    <Flex
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: '1 1 0',
+        height: '100%',
+        width: '100%',
+      }}
+      // sx={{
+      //   display: 'grid',
+      //   gridGap: 0,
+      //   gridTemplateColumns: `repeat(${layout.x}, 1fr) ${lastRowColumnTemplate}`,
+      //   gridTemplateRows: `repeat(${layout.y}, 1fr) ${lastRowRowTemplate}`,
+      //   height: '100%',
+      //   width: '100%',
+      // }}
+      {...props}
+    >
+      {gridData.map((row, rowIndex) => (
+        <Box
+          sx={{
+            flex: '1 1 0',
+            display: 'flex',
+            flexDirection: 'row',
+            height: 0,
+            width: '100%',
+          }}
+        >
+          {row.map((asset, colIndex) => (
+            <Box width={'100%'} height={'100%'}>
+              <Image src={asset} key={`${rowIndex}-${colIndex}`} />
+            </Box>
+          ))}
+        </Box>
+      ))}
+    </Flex>
+  )
+}
 
 const ParallaxContainer = styled(motion.div)({
   position: 'relative',
   overflow: 'hidden',
   borderRadius: 10,
   cursor: 'none',
+  height: '100%',
+  width: '100%',
 })
 
 const ParallaxInnerContainer = styled(motion.div)({
-  overflow: 'hidden',
-  borderRadius: 10,
+  height: '100%',
+  width: '100%',
 })
 
 const Image = styled(motion.img)({
@@ -113,27 +175,14 @@ const Image = styled(motion.img)({
   height: '100%',
 })
 
-const AspectRatioContainer = styled(Box)({
-  position: 'relative',
-  width: '100%',
-  height: 0,
-  paddingBottom: '56.25%',
-})
-
-const AspectRatioInner = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-})
-
 const HoverIndicator = styled(motion.div)({
   position: 'absolute',
+  overflow: 'visible',
   background:
-    'radial-gradient(closest-side, rgba(255, 255, 255, 0.4), transparent)',
-  width: '400px',
-  height: '400px',
+    'radial-gradient(closest-side, rgba(173, 0, 255, 0.1), transparent)',
+  // mixBlendMode: 'multiply',
+  width: '56.25%',
+  height: '100%',
   zIndex: 1000,
 })
 
@@ -146,6 +195,7 @@ function useAnimatedCard(
   const shadowOffset = transform([0, 1], ['6px', '-6px'])
   const shadowOpacity = transform([0, 1], [0, 0.2])
   const translate = transform([0, 1], ['-4px', '4px'])
+  const translateInner = transform([0, 1], ['2px', '-2px'])
 
   const cardParallaxAnimation = useAnimation()
   const imageParallaxAnimation = useAnimation()
@@ -156,6 +206,10 @@ function useAnimatedCard(
   const hover = useMotionValue(0)
 
   useEffect(() => {
+    if (!hoverIndicatorRef.current || !cardRef.current) {
+      return
+    }
+
     const indicatorRect =
       hoverIndicatorRef.current.getBoundingClientRect() || {}
     const cardRect = cardRef.current.getBoundingClientRect() || {}
@@ -203,8 +257,8 @@ function useAnimatedCard(
 
       imageParallaxAnimation.start(
         {
-          x: translate(pointerXValue),
-          y: translate(pointerYValue),
+          x: translateInner(pointerXValue),
+          y: translateInner(pointerYValue),
           transition: { type: 'tween', duration: 0.1 },
         },
         {
@@ -272,25 +326,6 @@ function useAnimatedCard(
       unsubscribeHover()
     }
   }, [cardRef, hoverIndicatorRef])
-
-  // const boxShadow = useTransform(
-  //   pointerY,
-  //   [0, 1],
-  //   [
-  //     '0px 5px 20px rgba(173, 0, 255, 0.2)',
-  //     '0px -5px 20px rgba(173, 0, 255, 0.2)',
-  //   ]
-  // )
-
-  // boxShadow: '0px 0px 10px rgba(173, 0, 255, 0.2)',
-
-  // const boxShadow = useSpring(
-  //   useTransform(pointerX, [0, 1], ['-45deg', '45deg']),
-  //   {
-  //     stiffness: 300,
-  //     damping: 100,
-  //   }
-  // )
 
   const onHoverStart = useCallback(() => {
     hover.set(1)
