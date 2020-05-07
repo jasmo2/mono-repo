@@ -5,7 +5,13 @@ import React, {
   useLayoutEffect,
   useState,
 } from 'react'
-import { motion, useMotionValue, transform, useAnimation } from 'framer-motion'
+import {
+  motion,
+  useMotionValue,
+  transform,
+  useAnimation,
+  AnimationControls,
+} from 'framer-motion'
 import {
   Card as RebassCard,
   CardProps as RebassCardProps,
@@ -26,6 +32,7 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
     onHoverEnd,
     onHoverStart,
     cardParallaxAnimation,
+    cardContentParallaxAnimation,
     imageParallaxAnimation,
     hoverIndicatorAnimation,
   } = useAnimatedCard(cardRef, hoverIndicatorRef)
@@ -66,8 +73,12 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
             initial={{ opacity: 0 }}
             animate={hoverIndicatorAnimation}
           />
-          <ParallaxInnerContainer animate={imageParallaxAnimation}>
-            <AssetGrid assets={assets} layout={layout} />
+          <ParallaxInnerContainer animate={cardContentParallaxAnimation}>
+            <AssetGrid
+              assets={assets}
+              layout={layout}
+              animateImage={imageParallaxAnimation}
+            />
           </ParallaxInnerContainer>
         </ParallaxContainer>
       </RebassCard>
@@ -78,6 +89,7 @@ const Card: React.FC<CardProps> = ({ children, assets, ...props }) => {
 export default Card
 
 interface AssetGridProps extends Pick<CardProps, 'assets'> {
+  animateImage: AnimationControls
   layout: {
     x: number
     y: number
@@ -85,7 +97,12 @@ interface AssetGridProps extends Pick<CardProps, 'assets'> {
   }
 }
 
-const AssetGrid: React.FC<AssetGridProps> = ({ assets, layout, ...props }) => {
+const AssetGrid: React.FC<AssetGridProps> = ({
+  assets,
+  layout,
+  animateImage,
+  ...props
+}) => {
   // Layout is a bit complicated as the last row might have an extra element.
   // const imageLayout = layout
   // let lastRowRowTemplate = ``
@@ -145,9 +162,9 @@ const AssetGrid: React.FC<AssetGridProps> = ({ assets, layout, ...props }) => {
           }}
         >
           {row.map((asset, colIndex) => (
-            <Box width={'100%'} height={'100%'}>
+            <ImageContainer animate={animateImage}>
               <Image src={asset} key={`${rowIndex}-${colIndex}`} />
-            </Box>
+            </ImageContainer>
           ))}
         </Box>
       ))}
@@ -175,14 +192,21 @@ const Image = styled(motion.img)({
   height: '100%',
 })
 
+const ImageContainer = styled(motion.div)({
+  width: '100%',
+  height: '100%',
+})
+
 const HoverIndicator = styled(motion.div)({
   position: 'absolute',
   overflow: 'visible',
+  top: 0,
+  left: 0,
   background:
-    'radial-gradient(closest-side, rgba(173, 0, 255, 0.1), transparent)',
+    'radial-gradient(closest-side, rgba(173, 0, 255, 0.2), transparent)',
   // mixBlendMode: 'multiply',
-  width: '56.25%',
-  height: '100%',
+  width: 200,
+  height: 200,
   zIndex: 1000,
 })
 
@@ -192,18 +216,23 @@ function useAnimatedCard(
   cardRef: React.MutableRefObject<any>,
   hoverIndicatorRef: React.MutableRefObject<any>
 ) {
-  const shadowOffset = transform([0, 1], ['6px', '-6px'])
+  const shadowOffset = transform([0, 1], ['10px', '-10px'])
   const shadowOpacity = transform([0, 1], [0, 0.2])
-  const translate = transform([0, 1], ['-4px', '4px'])
-  const translateInner = transform([0, 1], ['2px', '-2px'])
+  const translate = transform([0, 1], ['-12px', '12px'])
+  const translateInner = transform([0, 1], ['3px', '-3px'])
 
   const cardParallaxAnimation = useAnimation()
+  const cardContentParallaxAnimation = useAnimation()
   const imageParallaxAnimation = useAnimation()
   const hoverIndicatorAnimation = useAnimation()
 
   const pointerX = useMotionValue(0)
   const pointerY = useMotionValue(0)
   const hover = useMotionValue(0)
+  let cardRect = { width: 0, height: 0 }
+  if (cardRef.current) {
+    cardRect = cardRef.current.getBoundingClientRect()
+  }
 
   useEffect(() => {
     if (!hoverIndicatorRef.current || !cardRef.current) {
@@ -218,6 +247,8 @@ function useAnimatedCard(
       width: indicatorRect.width / 2,
       height: indicatorRect.height / 2,
     }
+
+    console.log('Indicator: ', indicatorSize_2, cardRect)
     const translateIndicatorX = transform(
       [0, 1],
       [-indicatorSize_2.width, cardRect.width - indicatorSize_2.width]
@@ -235,7 +266,7 @@ function useAnimatedCard(
 
       const shadowValue = `${shadowOffset(pointerXValue)} ${shadowOffset(
         pointerYValue
-      )} 20px rgba(173, 0, 255, ${shadowOpacity(hoverValue)})`
+      )} 30px rgba(173, 0, 255, ${shadowOpacity(hoverValue)})`
 
       cardParallaxAnimation.start(
         {
@@ -255,7 +286,7 @@ function useAnimatedCard(
         }
       )
 
-      imageParallaxAnimation.start(
+      cardContentParallaxAnimation.start(
         {
           x: translateInner(pointerXValue),
           y: translateInner(pointerYValue),
@@ -325,7 +356,7 @@ function useAnimatedCard(
       unsubscribeY()
       unsubscribeHover()
     }
-  }, [cardRef, hoverIndicatorRef])
+  }, [cardRef, hoverIndicatorRef, cardRect.width, cardRect.height])
 
   const onHoverStart = useCallback(() => {
     hover.set(1)
@@ -356,6 +387,7 @@ function useAnimatedCard(
     pointerY,
     hover,
     cardParallaxAnimation,
+    cardContentParallaxAnimation,
     imageParallaxAnimation,
     hoverIndicatorAnimation,
   }

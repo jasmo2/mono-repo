@@ -70,6 +70,7 @@
     "@types/rebass": "^4.0.5",
     "facepaint": "^1.2.1",
     "framer-motion": "^1.10.3",
-    "rebass": "^4.0.7"
+    "rebass": "^4.0.7",
+    "rxjs": "^6.5.5"
   }
 }
